@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{950278AF-692D-4123-81FF-5FCF11DEC1FE}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>CSharpToTypescriptConverter</RootNamespace>
-    <AssemblyName>CSharpToTypescriptConverter</AssemblyName>
+    <ProjectGuid>{8BEBD139-7981-439D-B3EA-0796910CE7C3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CSharpToTypescriptConverter.TestMock</RootNamespace>
+    <AssemblyName>CSharpToTypescriptConverter.TestMock</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -21,9 +20,9 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\CSharpToTypescriptConverter.TestMock.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -42,16 +41,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DocumentationInfo.cs" />
-    <Compile Include="DocumentationProvider.cs" />
-    <Compile Include="MemberInfo.cs" />
-    <Compile Include="MemberProvider.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TypeProvider.cs" />
+    <Compile Include="TestClasses.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <ProjectReference Include="..\CSharpToTypescriptConverter.TestMockReference\CSharpToTypescriptConverter.TestMockReference.csproj">
+      <Project>{C963A936-8884-4DF6-8451-CB71473E2214}</Project>
+      <Name>CSharpToTypescriptConverter.TestMockReference</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CSharpToTypescriptConverter.Test\CSharpToTypescriptConverter.Test.csproj">
+      <Project>{648ac3dc-bec9-451b-8d85-0c9af0982898}</Project>
+      <Name>CSharpToTypescriptConverter.Test</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

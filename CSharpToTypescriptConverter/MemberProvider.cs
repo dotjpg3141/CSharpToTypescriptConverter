@@ -53,7 +53,7 @@ namespace CSharpToTypescriptConverter
 					.Where(FilterFieldModifier)
 					.Select(property => new MemberInfo()
 					{
-						MemberType = MemberType.Property,
+						MemberType = MemberType.Field,
 						Type = property.FieldType,
 						Name = property.Name,
 					}));

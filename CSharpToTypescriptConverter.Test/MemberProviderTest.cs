@@ -49,6 +49,49 @@ namespace CSharpToTypescriptConverter.Test
 			Assert.AreEqual(MemberType.Property, members[1].MemberType);
 		}
 
+
+		[TestMethod]
+		public void GetClassPublicFieldTest()
+		{
+			var provider = new MemberProvider()
+			{
+				IncludeProperties = false,
+				IncludeFields = true,
+				IncludeInternal = false,
+			};
+
+			var member = provider.GetMembers(typeof(FieldMemberClassMock)).Single();
+
+			Assert.AreEqual(typeof(string), member.Type);
+			Assert.AreEqual(nameof(FieldMemberClassMock.PublicField), member.Name);
+			Assert.IsNull(member.Value);
+			Assert.AreEqual(MemberType.Field, member.MemberType);
+		}
+
+		[TestMethod]
+		public void GetClassProtectedFieldTest()
+		{
+			var provider = new MemberProvider()
+			{
+				IncludeProperties = false,
+				IncludeFields = true,
+				IncludeInternal = true,
+			};
+
+			var members = provider.GetMembers(typeof(FieldMemberClassMock)).OrderBy(m => m.Name).ToList();
+			Assert.AreEqual(2, members.Count);
+
+			Assert.AreEqual(typeof(string), members[0].Type);
+			Assert.AreEqual(nameof(FieldMemberClassMock.InternalField), members[0].Name);
+			Assert.IsNull(members[0].Value);
+			Assert.AreEqual(MemberType.Field, members[0].MemberType);
+
+			Assert.AreEqual(typeof(string), members[1].Type);
+			Assert.AreEqual(nameof(FieldMemberClassMock.PublicField), members[1].Name);
+			Assert.IsNull(members[1].Value);
+			Assert.AreEqual(MemberType.Field, members[1].MemberType);
+		}
+
 		[TestMethod]
 		public void GetEnumMemberTest()
 		{
@@ -70,6 +113,14 @@ namespace CSharpToTypescriptConverter.Test
 		internal string InternalProperty { get; set; }
 		protected string ProtectedProperty { get; set; }
 		private string PrivateProperty { get; set; }
+	}
+
+	internal class FieldMemberClassMock
+	{
+		public string PublicField;
+		internal string InternalField;
+		protected string ProtectedField;
+		private string PrivateField;
 	}
 
 	internal enum EnumMemberMock

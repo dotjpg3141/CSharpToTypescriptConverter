@@ -33,7 +33,7 @@ namespace CSharpToTypescriptConverter.TestMock
 		/// <summary>
 		/// Enum Value Documentation
 		/// </summary>
-		EnumValue,
+		EnumValue = 77,
 	}
 
 	public class BaseClass

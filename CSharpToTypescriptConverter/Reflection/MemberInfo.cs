@@ -6,8 +6,8 @@ namespace CSharpToTypescriptConverter.Reflection
 	public class MemberInfo
 	{
 		public string Name { get; set; }
-		public Type Type { get; set; }
-		public long? Value { get; set; }
+		public TypeInfo Type { get; set; }
+		public object Value { get; set; }
 		public MemberInfoType MemberInfoType { get; set; }
 	}
 

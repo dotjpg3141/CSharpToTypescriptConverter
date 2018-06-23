@@ -40,7 +40,7 @@ namespace CSharpToTypescriptConverter.Reflection
 					.Select(property => new MemberInfo()
 					{
 						MemberInfoType = MemberInfoType.Property,
-						Type = property.PropertyType,
+						Type = new TypeInfo(property.PropertyType),
 						Name = property.Name,
 					}));
 			}
@@ -53,7 +53,7 @@ namespace CSharpToTypescriptConverter.Reflection
 					.Select(property => new MemberInfo()
 					{
 						MemberInfoType = MemberInfoType.Field,
-						Type = property.FieldType,
+						Type = new TypeInfo(property.FieldType),
 						Name = property.Name,
 					}));
 			}
@@ -63,15 +63,22 @@ namespace CSharpToTypescriptConverter.Reflection
 
 		private IEnumerable<MemberInfo> GetEnumMembers(Type type)
 		{
-			return type.GetFields()
-				.Where(f => f.FieldType.IsEnum)
-				.Select(f => new MemberInfo()
+			var names = Enum.GetNames(type);
+			var typeInfo = new TypeInfo(type);
+
+			return names.Select(name =>
+			{
+				var enumValue = Enum.Parse(type, name);
+				var value = Convert.ToInt64(enumValue);
+
+				return new MemberInfo()
 				{
+					Type = typeInfo,
 					MemberInfoType = MemberInfoType.EnumMember,
-					Name = f.Name,
-					Value = Convert.ToInt64(f.GetRawConstantValue()),
-				})
-				.ToList();
+					Name = name,
+					Value = value,
+				};
+			}).ToList();
 		}
 
 		private bool FilterPropertyModifier(PropertyInfo property)

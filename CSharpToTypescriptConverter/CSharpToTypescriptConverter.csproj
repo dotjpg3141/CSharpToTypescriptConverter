@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="DocumentationInfo.cs" />
     <Compile Include="DocumentationProvider.cs" />
+    <Compile Include="IndentWriter.cs" />
     <Compile Include="Reflection\IMemberProvider.cs" />
     <Compile Include="Reflection\ITypeProvider.cs" />
     <Compile Include="Reflection\MemberInfo.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="Reflection\TypeInfo.cs" />
     <Compile Include="Reflection\TypeInfoType.cs" />
     <Compile Include="Reflection\TypeProvider.cs" />
+    <Compile Include="TypeScriptGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

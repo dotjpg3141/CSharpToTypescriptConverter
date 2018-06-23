@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using CSharpToTypescriptConverter.Reflection;
 
 namespace CSharpToTypescriptConverter
 {
@@ -30,7 +31,7 @@ namespace CSharpToTypescriptConverter
 			}
 		}
 
-		public bool TryGetDocumentation(Type type, out DocumentationInfo documentation)
+		public bool TryGetDocumentation(TypeInfo type, out DocumentationInfo documentation)
 			=> TryGetTypeDocumentation(type.FullName, out documentation);
 
 		internal bool TryGetTypeDocumentation(string fullTypeName, out DocumentationInfo documentation)

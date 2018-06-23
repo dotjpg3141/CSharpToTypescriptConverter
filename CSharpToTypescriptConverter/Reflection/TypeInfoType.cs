@@ -2,6 +2,6 @@
 {
 	public enum TypeInfoType
 	{
-		Class, Struct, Enum
+		Class, Enum
 	}
 }

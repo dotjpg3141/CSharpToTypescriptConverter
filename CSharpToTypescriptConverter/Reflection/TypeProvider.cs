@@ -157,15 +157,16 @@ namespace CSharpToTypescriptConverter.Reflection
 
 			private IEnumerable<Type> LoadTypes(string[] dllPath)
 			{
-				AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (sender, e) =>
+				AppDomain.CurrentDomain.AssemblyResolve += (sender, e) =>
 				{
-					var assembly = Assembly.ReflectionOnlyLoad(e.Name);
+					var assembly = Assembly.Load(e.Name);
 					return assembly ?? throw new TypeLoadException($"Could not load assembly '{e.Name}'");
 				};
 
-				var assemblies = dllPath.Select(Assembly.ReflectionOnlyLoadFrom).ToList();
-				var assembliesWithRefernces = assemblies.Where(TryLoadReferences).ToList();
-				var types = assembliesWithRefernces.SelectMany(type => type.DefinedTypes).ToList();
+				var assemblies = dllPath.Select(Assembly.LoadFrom).ToList();
+				//var assembliesWithRefernces = assemblies.Where(TryLoadReferences).ToList();
+				//var types = assembliesWithRefernces.SelectMany(type => type.DefinedTypes).ToList();
+				var types = assemblies.SelectMany(type => type.DefinedTypes).ToList();
 				return types;
 			}
 
@@ -175,7 +176,7 @@ namespace CSharpToTypescriptConverter.Reflection
 				{
 					try
 					{
-						var reference = Assembly.ReflectionOnlyLoad(referencedAssemblyName.FullName);
+						var reference = Assembly.Load(referencedAssemblyName.FullName);
 						if (!TryLoadReferences(reference))
 						{
 							return false;

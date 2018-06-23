@@ -11,6 +11,8 @@ namespace CSharpToTypescriptConverter.Reflection
 	{
 		public string Namespace { get; set; }
 		public string Name { get; set; }
+		public string FullName { get; set; }
+
 		public TypeInfoType Type { get; set; }
 		public IEnumerable<MemberInfo> Members { get; set; }
 
@@ -18,7 +20,8 @@ namespace CSharpToTypescriptConverter.Reflection
 		{
 			this.Namespace = type.Namespace;
 			this.Name = type.Name;
-			this.Type = TypeInfoType.Class; // TODO(jpg)
+			this.FullName = type.FullName;
+			this.Type = type.IsEnum ? TypeInfoType.Enum : TypeInfoType.Class;
 		}
 	}
 }

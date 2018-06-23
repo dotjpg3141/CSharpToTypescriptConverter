@@ -44,11 +44,15 @@
   <ItemGroup>
     <Compile Include="DocumentationInfo.cs" />
     <Compile Include="DocumentationProvider.cs" />
-    <Compile Include="MemberInfo.cs" />
-    <Compile Include="MemberProvider.cs" />
+    <Compile Include="Reflection\IMemberProvider.cs" />
+    <Compile Include="Reflection\ITypeProvider.cs" />
+    <Compile Include="Reflection\MemberInfo.cs" />
+    <Compile Include="Reflection\MemberProvider.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TypeProvider.cs" />
+    <Compile Include="Reflection\TypeInfo.cs" />
+    <Compile Include="Reflection\TypeInfoType.cs" />
+    <Compile Include="Reflection\TypeProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

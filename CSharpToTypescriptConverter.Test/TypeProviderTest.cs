@@ -2,133 +2,142 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
+using CSharpToTypescriptConverter.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static CSharpToTypescriptConverter.Test.FileHelper;
 
 namespace CSharpToTypescriptConverter.Test
 {
 	[TestClass]
 	public class TypeProviderTest
 	{
-		private List<Type> LoadedTypes { get; set; }
-
-		private Type PublicClass => this.LoadedTypes.Single(t => t.FullName == MockNamespace + ".PublicClass");
-		private Type PublicClass2 => this.LoadedTypes.Single(t => t.FullName == MockNamespace + ".PublicClass2");
-		private Type InternalClass => this.LoadedTypes.Single(t => t.FullName == MockNamespace + ".InternalClass");
-		private Type PublicEnum => this.LoadedTypes.Single(t => t.FullName == MockNamespace + ".PublicEnum");
-
-		private Type InheritedClass => this.LoadedTypes.Single(t => t.FullName == MockNamespace + ".InheritedClass");
-		private Type BaseClass => this.LoadedTypes.Single(t => t.FullName == MockNamespace + ".BaseClass");
-		private Type InheritedExternalClass => this.LoadedTypes.Single(t => t.FullName == MockNamespace + ".InheritedExternalClass");
-		private Type ExternalBaseClass => this.LoadedTypes.Single(t => t.FullName == MockReferenceNamespace + ".ExternalBaseClass");
-
-		[TestInitialize]
-		public void TestInitialize()
-		{
-			var dllName = GetProjectFile(MockNamespace, "dll");
-			var reference = GetProjectFile(MockReferenceNamespace, "dll");
-
-			var provider = new TypeProvider()
-			{
-				DllFilePaths = new[] { dllName, reference },
-			};
-
-			this.LoadedTypes = provider.LoadTypesFromDll(dllName)
-				.SelectMany(provider.GetTypeAndBaseTypes)
-				.Distinct()
-				.ToList();
-		}
+		private static readonly (string, string) PublicClass = (FileHelper.MockNamespace, "PublicClass");
+		private static readonly (string, string) PublicClass2 = (FileHelper.MockNamespace, "PublicClass2");
+		private static readonly (string, string) InternalClass = (FileHelper.MockNamespace, "InternalClass");
+		private static readonly (string, string) PublicEnum = (FileHelper.MockNamespace, "PublicClass");
+		private static readonly (string, string) InheritedClass = (FileHelper.MockNamespace, "InheritedClass");
+		private static readonly (string, string) BaseClass = (FileHelper.MockNamespace, "BaseClass");
+		private static readonly (string, string) InheritedExternalClass = (FileHelper.MockNamespace, "InheritedExternalClass");
+		private static readonly (string, string) ExternalBaseClass = (FileHelper.MockReferenceNamespace, "ExternalBaseClass");
 
 		[TestMethod]
 		public void LoadTypesFromDllTest()
 		{
-			Assert.IsTrue(this.LoadedTypes.Count == 8);
+			var types = GetTypeFromTypeProvider();
 
-			Assert.IsNotNull(this.PublicClass);
-			Assert.IsNotNull(this.PublicClass2);
-			Assert.IsNotNull(this.InternalClass);
-			Assert.IsNotNull(this.PublicEnum);
+			Assert.AreEqual(8, types.Length);
 
-			Assert.IsNotNull(this.InheritedClass);
-			Assert.IsNotNull(this.BaseClass);
-			Assert.IsNotNull(this.InheritedExternalClass);
-			Assert.IsNotNull(this.ExternalBaseClass);
+			Assert.IsNotNull(types.TryFindType(PublicClass));
+			Assert.IsNotNull(types.TryFindType(PublicClass2));
+			Assert.IsNotNull(types.TryFindType(InternalClass));
+			Assert.IsNotNull(types.TryFindType(PublicEnum));
+			Assert.IsNotNull(types.TryFindType(InheritedClass));
+			Assert.IsNotNull(types.TryFindType(BaseClass));
+			Assert.IsNotNull(types.TryFindType(InheritedExternalClass));
+			Assert.IsNotNull(types.TryFindType(ExternalBaseClass));
 		}
 
 		[TestMethod]
 		public void FilterByModifierPublicTest()
 		{
-			var provider = new TypeProvider
-			{
-				IncludeInternalTypes = false
-			};
+			var types = GetTypeFromTypeProvider(options => options.IncludeInternalTypes = false);
 
-			Assert.IsTrue(provider.FilterByModifier(this.PublicClass));
-			Assert.IsFalse(provider.FilterByModifier(this.InternalClass));
+			Assert.IsNotNull(types.TryFindType(PublicClass));
+			Assert.IsNull(types.TryFindType(InternalClass));
 		}
 
 		[TestMethod]
 		public void FilterByModifierInternalTest()
 		{
-			var provider = new TypeProvider
-			{
-				IncludeInternalTypes = true
-			};
+			var types = GetTypeFromTypeProvider(options => options.IncludeInternalTypes = true);
 
-			Assert.IsTrue(provider.FilterByModifier(this.PublicClass));
-			Assert.IsTrue(provider.FilterByModifier(this.InternalClass));
+			Assert.IsNotNull(types.TryFindType(PublicClass));
+			Assert.IsNotNull(types.TryFindType(InternalClass));
 		}
 
 		[TestMethod]
 		public void FilterByTypeNoEnumsNoClassTest()
 		{
-			var provider = new TypeProvider()
+			var types = GetTypeFromTypeProvider(options =>
 			{
-				IncludeClasses = false,
-				IncludeEnums = false,
-			};
+				options.IncludeClasses = false;
+				options.IncludeEnums = false;
+			});
 
-			Assert.IsFalse(provider.FilterByType(this.PublicClass));
-			Assert.IsFalse(provider.FilterByType(this.PublicEnum));
+			Assert.IsNull(types.TryFindType(PublicClass));
+			Assert.IsNull(types.TryFindType(PublicEnum));
 		}
 
 		[TestMethod]
 		public void FilterByTypeWithEnumsWithClassTest()
 		{
-			var provider = new TypeProvider()
+			var types = GetTypeFromTypeProvider(options =>
 			{
-				IncludeClasses = true,
-				IncludeEnums = true,
-			};
+				options.IncludeClasses = true;
+				options.IncludeEnums = true;
+			});
 
-			Assert.IsTrue(provider.FilterByType(this.PublicClass));
-			Assert.IsTrue(provider.FilterByType(this.PublicEnum));
+			Assert.IsNotNull(types.TryFindType(PublicClass));
+			Assert.IsNotNull(types.TryFindType(PublicEnum));
 		}
 
 		[TestMethod]
 		public void FilterByInclusionTest()
 		{
-			var provider = new TypeProvider()
+			var types = GetTypeFromTypeProvider(options =>
 			{
-				Inclusions = new[] { new Regex("Class2") },
-			};
+				options.Inclusions = new[] { new Regex("Class2") };
+			});
 
-			Assert.IsFalse(provider.FilterByInclusion(this.PublicClass));
-			Assert.IsTrue(provider.FilterByInclusion(this.PublicClass2));
+			Assert.IsNull(types.TryFindType(PublicClass));
+			Assert.IsNotNull(types.TryFindType(PublicClass2));
 		}
 
 		[TestMethod]
 		public void FilterByExclusionTest()
 		{
+			var types = GetTypeFromTypeProvider(options =>
+			{
+				options.Exclusions = new[] { new Regex("Class2") };
+			});
+
+			Assert.IsNotNull(types.TryFindType(PublicClass));
+			Assert.IsNull(types.TryFindType(PublicClass2));
+		}
+
+		private static TypeInfo[] GetTypeFromTypeProvider(Action<TypeProvider> options = null)
+		{
+			var dllName = FileHelper.GetProjectFile(FileHelper.MockNamespace, "dll");
+
 			var provider = new TypeProvider()
 			{
-				Exclusions = new[] { new Regex("Class2") },
+				DllFilePaths = new[]
+				{
+					Directory.GetParent(dllName).FullName,
+				},
+				IncludeInternalTypes = true,
+				IncludeEnums = true,
+				IncludeClasses = true,
+				IncludeStructs = true,
 			};
 
-			Assert.IsTrue(provider.FilterByExclusion(this.PublicClass));
-			Assert.IsFalse(provider.FilterByExclusion(this.PublicClass2));
+			options?.Invoke(provider);
+			return provider.GetTypes(new MemberProviderMock()).ToArray();
 		}
+
+		[Serializable]
+		private class MemberProviderMock : IMemberProvider
+		{
+			public IEnumerable<MemberInfo> GetMembers(Type type)
+			{
+				return new MemberInfo[0];
+			}
+		}
+	}
+
+	internal static class TypeProviderTestExtension
+	{
+		public static TypeInfo TryFindType(this IEnumerable<TypeInfo> types, (string @namespace, string name) info)
+			=> types.SingleOrDefault(t => t.Namespace == info.@namespace && t.Name == info.name);
 	}
 }

@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CSharpToTypescriptConverter
+namespace CSharpToTypescriptConverter.Reflection
 {
-	public class MemberProvider
+	[Serializable]
+	public class MemberProvider : IMemberProvider
 	{
 		public bool IncludeProperties { get; set; }
 		public bool IncludeFields { get; set; }
@@ -40,7 +39,7 @@ namespace CSharpToTypescriptConverter
 					.Where(FilterPropertyModifier)
 					.Select(property => new MemberInfo()
 					{
-						MemberType = MemberType.Property,
+						MemberInfoType = MemberInfoType.Property,
 						Type = property.PropertyType,
 						Name = property.Name,
 					}));
@@ -53,7 +52,7 @@ namespace CSharpToTypescriptConverter
 					.Where(FilterFieldModifier)
 					.Select(property => new MemberInfo()
 					{
-						MemberType = MemberType.Field,
+						MemberInfoType = MemberInfoType.Field,
 						Type = property.FieldType,
 						Name = property.Name,
 					}));
@@ -68,7 +67,7 @@ namespace CSharpToTypescriptConverter
 				.Where(f => f.FieldType.IsEnum)
 				.Select(f => new MemberInfo()
 				{
-					MemberType = MemberType.EnumMember,
+					MemberInfoType = MemberInfoType.EnumMember,
 					Name = f.Name,
 					Value = Convert.ToInt64(f.GetRawConstantValue()),
 				})

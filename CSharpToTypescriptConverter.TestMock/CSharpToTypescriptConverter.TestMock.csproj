@@ -49,10 +49,6 @@
       <Project>{C963A936-8884-4DF6-8451-CB71473E2214}</Project>
       <Name>CSharpToTypescriptConverter.TestMockReference</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CSharpToTypescriptConverter.Test\CSharpToTypescriptConverter.Test.csproj">
-      <Project>{648ac3dc-bec9-451b-8d85-0c9af0982898}</Project>
-      <Name>CSharpToTypescriptConverter.Test</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CSharpToTypescriptConverter.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpToTypescriptConverter.Test
@@ -22,7 +23,7 @@ namespace CSharpToTypescriptConverter.Test
 			Assert.AreEqual(typeof(string), member.Type);
 			Assert.AreEqual(nameof(PropertyMemberClassMock.PublicProperty), member.Name);
 			Assert.IsNull(member.Value);
-			Assert.AreEqual(MemberType.Property, member.MemberType);
+			Assert.AreEqual(MemberInfoType.Property, member.MemberInfoType);
 		}
 
 		[TestMethod]
@@ -41,12 +42,12 @@ namespace CSharpToTypescriptConverter.Test
 			Assert.AreEqual(typeof(string), members[0].Type);
 			Assert.AreEqual(nameof(PropertyMemberClassMock.InternalProperty), members[0].Name);
 			Assert.IsNull(members[0].Value);
-			Assert.AreEqual(MemberType.Property, members[0].MemberType);
+			Assert.AreEqual(MemberInfoType.Property, members[0].MemberInfoType);
 
 			Assert.AreEqual(typeof(string), members[1].Type);
 			Assert.AreEqual(nameof(PropertyMemberClassMock.PublicProperty), members[1].Name);
 			Assert.IsNull(members[1].Value);
-			Assert.AreEqual(MemberType.Property, members[1].MemberType);
+			Assert.AreEqual(MemberInfoType.Property, members[1].MemberInfoType);
 		}
 
 
@@ -65,7 +66,7 @@ namespace CSharpToTypescriptConverter.Test
 			Assert.AreEqual(typeof(string), member.Type);
 			Assert.AreEqual(nameof(FieldMemberClassMock.PublicField), member.Name);
 			Assert.IsNull(member.Value);
-			Assert.AreEqual(MemberType.Field, member.MemberType);
+			Assert.AreEqual(MemberInfoType.Field, member.MemberInfoType);
 		}
 
 		[TestMethod]
@@ -84,12 +85,12 @@ namespace CSharpToTypescriptConverter.Test
 			Assert.AreEqual(typeof(string), members[0].Type);
 			Assert.AreEqual(nameof(FieldMemberClassMock.InternalField), members[0].Name);
 			Assert.IsNull(members[0].Value);
-			Assert.AreEqual(MemberType.Field, members[0].MemberType);
+			Assert.AreEqual(MemberInfoType.Field, members[0].MemberInfoType);
 
 			Assert.AreEqual(typeof(string), members[1].Type);
 			Assert.AreEqual(nameof(FieldMemberClassMock.PublicField), members[1].Name);
 			Assert.IsNull(members[1].Value);
-			Assert.AreEqual(MemberType.Field, members[1].MemberType);
+			Assert.AreEqual(MemberInfoType.Field, members[1].MemberInfoType);
 		}
 
 		[TestMethod]
@@ -102,7 +103,7 @@ namespace CSharpToTypescriptConverter.Test
 			Assert.IsNull(member.Type);
 			Assert.AreEqual(nameof(EnumMemberMock.EnumMember), member.Name);
 			Assert.AreEqual(77, member.Value);
-			Assert.AreEqual(MemberType.EnumMember, member.MemberType);
+			Assert.AreEqual(MemberInfoType.EnumMember, member.MemberInfoType);
 		}
 
 	}
@@ -115,6 +116,8 @@ namespace CSharpToTypescriptConverter.Test
 		private string PrivateProperty { get; set; }
 	}
 
+#pragma warning disable 649
+#pragma warning disable 169
 	internal class FieldMemberClassMock
 	{
 		public string PublicField;
@@ -122,6 +125,8 @@ namespace CSharpToTypescriptConverter.Test
 		protected string ProtectedField;
 		private string PrivateField;
 	}
+#pragma warning restore 169
+#pragma warning restore 649
 
 	internal enum EnumMemberMock
 	{

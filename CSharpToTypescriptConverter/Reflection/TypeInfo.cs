@@ -52,12 +52,22 @@ namespace CSharpToTypescriptConverter.Reflection
 		private TypeInfo(Type type)
 		{
 			this.Namespace = type.Namespace;
-			this.Name = type.Name;
+			this.Name = NormalizeName(type.Name);
 			this.FullName = type.FullName ?? "";
 			this.Type = type.IsEnum ? TypeInfoType.Enum : TypeInfoType.Class;
 
 			var baseTypeName = type.BaseType?.FullName ?? "";
 			this.BaseType = ExludedInheritanceTypes.Contains(baseTypeName) ? null : FromType(type.BaseType);
+		}
+
+		private static string NormalizeName(string typeName)
+		{
+			int index = typeName.IndexOf("`", StringComparison.Ordinal);
+			if (index != -1)
+			{
+				typeName = typeName.Substring(0, index);
+			}
+			return typeName;
 		}
 
 		public static TypeInfo FromType(Type type)
@@ -96,6 +106,30 @@ namespace CSharpToTypescriptConverter.Reflection
 				arrayTypeInfo.ElementType = FromType(typeof(object));
 				return arrayTypeInfo;
 			}
+			else if (type.IsGenericType)
+			{
+				if (type.IsGenericTypeDefinition)
+				{
+					var genericType = new GenericDefinitionType(type);
+					TypeInfoCache[type] = genericType;
+					genericType.Arguments = type.GetGenericArguments().Select(FromType).Cast<GenericArgumentType>().ToArray();
+					return genericType;
+				}
+				else
+				{
+					var genericType = new GenericType(type);
+					TypeInfoCache[type] = genericType;
+					genericType.Definition = (GenericDefinitionType)FromType(type.GetGenericTypeDefinition());
+					genericType.TypeParameters = type.GetGenericArguments().Select(FromType).ToArray();
+					return genericType;
+				}
+			}
+			else if (type.IsGenericParameter)
+			{
+				var genericType = new GenericArgumentType(type);
+				TypeInfoCache[type] = genericType;
+				return genericType;
+			}
 			else
 			{
 				var simpleTypeInfo = new SimpleType(type);
@@ -121,7 +155,7 @@ namespace CSharpToTypescriptConverter.Reflection
 			public TypeInfo ElementType
 			{
 				get => this.elementType;
-				set
+				internal set
 				{
 					if (this.elementType != null)
 					{
@@ -142,6 +176,76 @@ namespace CSharpToTypescriptConverter.Reflection
 		public sealed class DynamicType : TypeInfo
 		{
 			internal DynamicType(Type type)
+				: base(type)
+			{
+			}
+		}
+
+		[Serializable]
+		public sealed class GenericDefinitionType : TypeInfo
+		{
+			private IReadOnlyList<GenericArgumentType> arguments;
+			public IReadOnlyList<GenericArgumentType> Arguments
+			{
+				get => this.arguments;
+				internal set
+				{
+					if (this.arguments != null)
+					{
+						throw new InvalidOperationException();
+					}
+					this.arguments = value;
+				}
+			}
+
+			internal GenericDefinitionType(Type type)
+				: base(type)
+			{
+			}
+		}
+
+		[Serializable]
+		public sealed class GenericArgumentType : TypeInfo
+		{
+			internal GenericArgumentType(Type type)
+				: base(type)
+			{
+			}
+		}
+
+		[Serializable]
+		public sealed class GenericType : TypeInfo
+		{
+			private GenericDefinitionType definition;
+			private IReadOnlyList<TypeInfo> typeParameters;
+
+			public IReadOnlyList<TypeInfo> TypeParameters
+			{
+				get => this.typeParameters;
+				internal set
+				{
+					if (this.typeParameters != null || value.Count != this.definition.Arguments.Count)
+					{
+						throw new InvalidOperationException();
+					}
+					this.typeParameters = value;
+				}
+			}
+
+			public GenericDefinitionType Definition
+			{
+				get => this.definition;
+				internal set
+				{
+					if (this.definition != null)
+					{
+						throw new InvalidOperationException();
+					}
+					this.definition = value;
+				}
+			}
+
+			public GenericType(Type type)
 				: base(type)
 			{
 			}

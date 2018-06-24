@@ -14,6 +14,7 @@ namespace CSharpToTypescriptConverter
 	public class TypeScriptGenerator
 	{
 		private static readonly Regex Whitespace = new Regex(@"\s+", RegexOptions.Compiled);
+		private static readonly string NullableType = typeof(Nullable<>).FullName;
 		public const string Number = "number";
 		public const string String = "string";
 		public const string Any = "any";
@@ -107,6 +108,23 @@ namespace CSharpToTypescriptConverter
 				WriteTypeInfoType(typeInfo);
 				this.writer.Write(" ");
 				WriteType(typeInfo);
+
+				if (typeInfo is TypeInfo.GenericDefinitionType generic)
+				{
+					var paramters = generic.Arguments.ToArray();
+
+					this.writer.Write("<");
+					for (int i = 0; i < paramters.Length; i++)
+					{
+						if (i != 0)
+						{
+							this.writer.Write(",");
+						}
+						this.writer.Write(paramters[i].Name);
+					}
+					this.writer.Write(">");
+				}
+
 				if (typeInfo.BaseType != null)
 				{
 					this.writer.Write(" extends ");
@@ -178,13 +196,46 @@ namespace CSharpToTypescriptConverter
 				this.WriteType(arrayType.ElementType);
 				this.writer.Write("[]");
 			}
+			else if (typeInfo is TypeInfo.GenericType genericType
+				&& this.generatingTypes.Contains(genericType.Definition))
+			{
+				this.WriteTypeName(typeInfo);
+				this.writer.Write("<");
+				bool first = true;
+				foreach (var typeParameter in genericType.TypeParameters)
+				{
+					if (first)
+					{
+						first = false;
+					}
+					else
+					{
+						this.writer.Write(", ");
+					}
+					if (typeParameter != null)
+					{
+						this.WriteType(typeParameter);
+					}
+					else
+					{
+						this.writer.Write(Any);
+					}
+				}
+				this.writer.Write(">");
+			}
+			else if (typeInfo is TypeInfo.GenericType nullableType
+					 && nullableType.Definition.FullName == NullableType)
+			{
+				this.writer.Write("(");
+				this.WriteType(nullableType.TypeParameters.Single());
+				this.writer.Write(" | null)");
+			}
 			else if (this.CSharpToTypescriptTypes.TryGetValue(typeInfo.FullName, out var typescriptType))
 			{
 				this.writer.Write(typescriptType);
 			}
 			else
 			{
-				//WriteTypeName(typeInfo);
 				WriteTypeName(typeInfo);
 			}
 		}
@@ -199,6 +250,10 @@ namespace CSharpToTypescriptConverter
 			{
 				var prefix = typeInfo.Type == TypeInfoType.Enum ? this.EnumPrefix : this.ClassPrefix;
 				this.writer.Write(prefix + typeInfo.Name);
+			}
+			else if (typeInfo is TypeInfo.GenericArgumentType)
+			{
+				this.writer.Write(typeInfo.Name);
 			}
 			else
 			{

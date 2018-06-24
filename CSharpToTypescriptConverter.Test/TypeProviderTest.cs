@@ -26,7 +26,7 @@ namespace CSharpToTypescriptConverter.Test
 		{
 			var types = GetTypeFromTypeProvider();
 
-			Assert.AreEqual(9, types.Length);
+			Assert.IsTrue(types.Length >= 9);
 
 			Assert.IsNotNull(types.TryFindType(PublicClass));
 			Assert.IsNotNull(types.TryFindType(PublicClass2));

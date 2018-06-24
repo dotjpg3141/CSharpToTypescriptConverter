@@ -52,7 +52,7 @@ namespace CSharpToTypescriptConverter
 
 		public void Generate(IEnumerable<TypeInfo> types)
 		{
-			foreach (var type in types)
+			foreach (var type in types.OrderBy(type => type.InheritanceLevel).ThenBy(type => type.Name))
 			{
 				WriteTypeDeclaration(type);
 			}
@@ -70,6 +70,11 @@ namespace CSharpToTypescriptConverter
 			WriteTypeInfoType(typeInfo);
 			this.writer.Write(" ");
 			WriteType(typeInfo);
+			if (typeInfo.BaseType != null)
+			{
+				this.writer.Write(" extends ");
+				this.WriteType(typeInfo.BaseType);
+			}
 			this.writer.Write(" {");
 			this.writer.EndLine();
 

@@ -12,13 +12,6 @@ namespace CSharpToTypescriptConverter.Reflection
 	[Serializable]
 	public class TypeProvider : ITypeProvider
 	{
-		private static readonly HashSet<string> ExludedInheritanceTypes = new HashSet<string>()
-		{
-			"System.Object",
-			"System.ValueType",
-			"System.Enum",
-		};
-
 		public string[] DllFilePaths { get; set; }
 		public Regex[] Inclusions { get; set; }
 		public Regex[] Exclusions { get; set; }
@@ -70,7 +63,7 @@ namespace CSharpToTypescriptConverter.Reflection
 
 		internal IEnumerable<Type> GetTypeAndBaseTypes(Type type)
 		{
-			while (type != null && !ExludedInheritanceTypes.Contains(type.FullName))
+			while (type != null && !TypeInfo.ExludedInheritanceTypes.Contains(type.FullName))
 			{
 				yield return type;
 				type = type.BaseType;

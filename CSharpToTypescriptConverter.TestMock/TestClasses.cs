@@ -28,6 +28,9 @@ namespace CSharpToTypescriptConverter.TestMock
 	{
 	}
 
+	/// <summary>
+	/// Enum Declaration
+	/// </summary>
 	public enum PublicEnum
 	{
 		/// <summary>
@@ -43,11 +46,11 @@ namespace CSharpToTypescriptConverter.TestMock
 
 	public class InheritedClass : BaseClass
 	{
-
+		public int Property1 { get; set; }
 	}
 
 	public class InheritedExternalClass : ExternalBaseClass
 	{
-
+		public int Property2 { get; set; }
 	}
 }

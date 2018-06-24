@@ -32,11 +32,27 @@ namespace CSharpToTypescriptConverter
 		}
 
 		public bool TryGetDocumentation(TypeInfo type, out DocumentationInfo documentation)
-			=> TryGetTypeDocumentation(type.FullName, out documentation);
+			=> TryGetDocumentation('T', type.FullName, out documentation);
 
-		internal bool TryGetTypeDocumentation(string fullTypeName, out DocumentationInfo documentation)
+		internal bool TryGetDocumentation(TypeInfo type, MemberInfo member, out DocumentationInfo documentation)
 		{
-			var identifier = "T:" + fullTypeName;
+			var fullName = type.FullName + "." + member.Name;
+
+			switch (member.MemberInfoType)
+			{
+				case MemberInfoType.EnumMember:
+				case MemberInfoType.Field:
+					return TryGetDocumentation('F', fullName, out documentation);
+				case MemberInfoType.Property:
+					return TryGetDocumentation('P', fullName, out documentation);
+				default:
+					throw new InvalidOperationException(member.MemberInfoType.ToString());
+			}
+		}
+
+		internal bool TryGetDocumentation(char type, string fullName, out DocumentationInfo documentation)
+		{
+			var identifier = $"{type}:{fullName}";
 			return this.loadedMembers.TryGetValue(identifier, out documentation);
 		}
 	}

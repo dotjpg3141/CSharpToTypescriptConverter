@@ -51,10 +51,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DocumentationProviderTest.cs" />
     <Compile Include="FileHelper.cs" />
+    <Compile Include="GeneratorHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeProviderTest.cs" />
-    <Compile Include="DocumentationProviderTest.cs" />
     <Compile Include="MemberProviderTest.cs" />
     <Compile Include="TypeScriptGeneratorClassDeclarationTest.cs" />
   </ItemGroup>

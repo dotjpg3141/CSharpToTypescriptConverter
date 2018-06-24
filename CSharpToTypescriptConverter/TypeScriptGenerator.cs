@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using CSharpToTypescriptConverter.Reflection;
@@ -11,6 +12,7 @@ namespace CSharpToTypescriptConverter
 {
 	public class TypeScriptGenerator
 	{
+		private static readonly Regex Whitespace = new Regex(@"\s+", RegexOptions.Compiled);
 		public const string Number = "Number";
 		public const string String = "String";
 		public const string Any = "any";
@@ -21,6 +23,8 @@ namespace CSharpToTypescriptConverter
 		public string ClassPrefix { get; set; }
 		public string EnumPrefix { get; set; }
 		public bool MakeEnumsConst { get; set; }
+
+		public DocumentationProvider DocumentationProvider { get; set; }
 
 		public Dictionary<string, string> CSharpToTypescriptTypes = new Dictionary<string, string>()
 		{
@@ -42,6 +46,7 @@ namespace CSharpToTypescriptConverter
 
 		public TypeScriptGenerator(TextWriter writer)
 		{
+			this.DocumentationProvider = new DocumentationProvider();
 			this.writer = new IndentWriter(writer);
 		}
 
@@ -55,6 +60,11 @@ namespace CSharpToTypescriptConverter
 
 		public void WriteTypeDeclaration(TypeInfo typeInfo)
 		{
+			if (this.DocumentationProvider.TryGetDocumentation(typeInfo, out var documentation))
+			{
+				this.WriteDocumentation(documentation);
+			}
+
 			this.writer.BeginLine();
 			this.writer.Write("export ");
 			WriteTypeInfoType(typeInfo);
@@ -66,7 +76,7 @@ namespace CSharpToTypescriptConverter
 			this.writer.Indent();
 			foreach (var member in typeInfo.Members)
 			{
-				WriteMemberDeclaration(member);
+				WriteMemberDeclaration(typeInfo, member);
 			}
 			this.writer.Unindent();
 
@@ -74,8 +84,24 @@ namespace CSharpToTypescriptConverter
 			this.writer.WriteLine();
 		}
 
-		private void WriteMemberDeclaration(MemberInfo member)
+		private void WriteDocumentation(DocumentationInfo documentation)
 		{
+			this.writer.WriteLine("/**");
+			if (documentation.Summary != null)
+			{
+				var info = Whitespace.Replace(documentation.Summary, " ").Trim();
+				this.writer.WriteLine("* " + info);
+			}
+			this.writer.WriteLine("*/");
+		}
+
+		private void WriteMemberDeclaration(TypeInfo type, MemberInfo member)
+		{
+			if (this.DocumentationProvider.TryGetDocumentation(type, member, out var documentation))
+			{
+				this.WriteDocumentation(documentation);
+			}
+
 			this.writer.BeginLine();
 			if (member.MemberInfoType == MemberInfoType.EnumMember)
 			{

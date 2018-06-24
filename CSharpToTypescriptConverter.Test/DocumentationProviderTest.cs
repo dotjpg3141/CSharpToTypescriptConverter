@@ -13,7 +13,7 @@ namespace CSharpToTypescriptConverter.Test
 			var provider = new DocumentationProvider();
 			provider.LoadFile(GetProjectFile(MockNamespace, "xml"));
 
-			Assert.IsTrue(provider.TryGetTypeDocumentation(MockNamespace + ".PublicClass", out var documentation));
+			Assert.IsTrue(provider.TryGetDocumentation('T', MockNamespace + ".PublicClass", out var documentation));
 			Assert.AreEqual("Class Documentation", documentation.Summary);
 		}
 	}

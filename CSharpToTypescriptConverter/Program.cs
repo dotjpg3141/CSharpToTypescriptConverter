@@ -21,11 +21,16 @@ namespace CSharpToTypescriptConverter
 			{
 				DllFilePaths = new[] { input },
 			};
-
 			var memberProvider = new MemberProvider();
-			var types = typeProvider.GetTypes(memberProvider);
 
-			var generator = new TypeScriptGenerator(Console.Out);
+			var documentationProvider = new DocumentationProvider();
+			documentationProvider.LoadFile(GetProjectDirectory(MockNamespace) + MockNamespace + ".xml");
+
+			var types = typeProvider.GetTypes(memberProvider);
+			var generator = new TypeScriptGenerator(Console.Out)
+			{
+				DocumentationProvider = documentationProvider,
+			};
 			generator.Generate(types);
 		}
 

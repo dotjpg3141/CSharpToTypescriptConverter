@@ -58,6 +58,7 @@
     <Compile Include="TypeProviderTest.cs" />
     <Compile Include="MemberProviderTest.cs" />
     <Compile Include="TypeScriptGeneratorClassDeclarationTest.cs" />
+    <Compile Include="WildcardTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

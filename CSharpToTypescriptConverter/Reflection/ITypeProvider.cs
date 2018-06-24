@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CSharpToTypescriptConverter.Reflection;
+﻿using System.Collections.Generic;
 
-namespace CSharpToTypescriptConverter
+namespace CSharpToTypescriptConverter.Reflection
 {
 	public interface ITypeProvider
 	{

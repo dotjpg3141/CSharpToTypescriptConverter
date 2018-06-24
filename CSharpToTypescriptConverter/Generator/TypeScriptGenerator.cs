@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml.Schema;
 using CSharpToTypescriptConverter.Reflection;
 
-namespace CSharpToTypescriptConverter
+namespace CSharpToTypescriptConverter.Generator
 {
 	public class TypeScriptGenerator
 	{
@@ -21,6 +18,7 @@ namespace CSharpToTypescriptConverter
 		public const string Boolean = "boolean";
 		public const string Date = "Date";
 
+		public TextWriter InnerWriter => this.writer.InnerWriter;
 		private readonly IndentWriter writer;
 
 		public bool MakeClassesToInterfaces { get; set; }

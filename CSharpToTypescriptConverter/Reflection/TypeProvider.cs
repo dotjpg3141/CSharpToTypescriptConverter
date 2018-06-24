@@ -62,15 +62,6 @@ namespace CSharpToTypescriptConverter.Reflection
 				.ToArray();
 		}
 
-		internal IEnumerable<Type> GetTypeAndBaseTypes(Type type)
-		{
-			while (type != null && !TypeInfo.ExludedInheritanceTypes.Contains(type.FullName))
-			{
-				yield return type;
-				type = type.BaseType;
-			}
-		}
-
 		internal bool FilterByModifier(Type type)
 		{
 			var isPublic = type.IsPublic;
@@ -104,6 +95,12 @@ namespace CSharpToTypescriptConverter.Reflection
 
 			var name = type.FullName ?? throw new InvalidOperationException($"Cannot read type name of type {type}");
 			return this.Exclusions.All(rule => !rule.IsMatch(name));
+		}
+
+		internal IEnumerable<Type> GetTypeAndBaseTypes(Type type)
+		{
+			return type.GetTypeAndBaseTypes()
+				.TakeWhile(tp => !TypeInfo.ExludedInheritanceTypes.Contains(tp.FullName));
 		}
 
 		private static AppDomain GetTempAppDomain()

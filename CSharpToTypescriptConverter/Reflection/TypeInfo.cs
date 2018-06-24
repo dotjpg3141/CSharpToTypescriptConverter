@@ -12,6 +12,7 @@ namespace CSharpToTypescriptConverter.Reflection
 	{
 		private static readonly string IEnumerableType = typeof(System.Collections.IEnumerable).FullName;
 		private static readonly string GenericIEnumerableType = typeof(IEnumerable<>).FullName;
+		private static readonly string DynamicObjectType = typeof(System.Dynamic.DynamicObject).FullName;
 
 		public static readonly ImmutableHashSet<string> ExludedInheritanceTypes = new[]
 		{
@@ -19,6 +20,7 @@ namespace CSharpToTypescriptConverter.Reflection
 			typeof(object).FullName,
 			typeof(ValueType).FullName,
 			typeof(Enum).FullName,
+			DynamicObjectType,
 		}.ToImmutableHashSet();
 
 		private IReadOnlyList<MemberInfo> members;
@@ -59,8 +61,12 @@ namespace CSharpToTypescriptConverter.Reflection
 		{
 			var interfaces = type.GetInterfaces();
 
-			if (interfaces.FirstOrDefault(itf => itf.IsGenericType
-				&& itf.GetGenericTypeDefinition().FullName == GenericIEnumerableType) is Type arrayType)
+			if (type.GetTypeAndBaseTypes().Any(t => t.FullName == DynamicObjectType))
+			{
+				return new DynamicType(type);
+			}
+			else if (interfaces.FirstOrDefault(itf => itf.IsGenericType
+			  && itf.GetGenericTypeDefinition().FullName == GenericIEnumerableType) is Type arrayType)
 			{
 				var parameter = arrayType.GetGenericArguments().Single();
 				return new ArrayType(type, FromType(parameter));
@@ -90,6 +96,15 @@ namespace CSharpToTypescriptConverter.Reflection
 				: base(type)
 			{
 				this.ElementType = elementType;
+			}
+		}
+
+		[Serializable]
+		public sealed class DynamicType : TypeInfo
+		{
+			internal DynamicType(Type type)
+				: base(type)
+			{
 			}
 		}
 	}

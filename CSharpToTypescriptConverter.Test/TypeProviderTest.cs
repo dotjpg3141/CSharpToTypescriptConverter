@@ -19,13 +19,14 @@ namespace CSharpToTypescriptConverter.Test
 		private static readonly (string, string) BaseClass = (FileHelper.MockNamespace, "BaseClass");
 		private static readonly (string, string) InheritedExternalClass = (FileHelper.MockNamespace, "InheritedExternalClass");
 		private static readonly (string, string) ExternalBaseClass = (FileHelper.MockReferenceNamespace, "ExternalBaseClass");
+		private static readonly (string, string) DynamicClass = (FileHelper.MockNamespace, "DynamicClass");
 
 		[TestMethod]
 		public void LoadTypesFromDllTest()
 		{
 			var types = GetTypeFromTypeProvider();
 
-			Assert.AreEqual(8, types.Length);
+			Assert.AreEqual(9, types.Length);
 
 			Assert.IsNotNull(types.TryFindType(PublicClass));
 			Assert.IsNotNull(types.TryFindType(PublicClass2));
@@ -35,6 +36,7 @@ namespace CSharpToTypescriptConverter.Test
 			Assert.IsNotNull(types.TryFindType(BaseClass));
 			Assert.IsNotNull(types.TryFindType(InheritedExternalClass));
 			Assert.IsNotNull(types.TryFindType(ExternalBaseClass));
+			Assert.IsNotNull(types.TryFindType(DynamicClass));
 		}
 
 		[TestMethod]

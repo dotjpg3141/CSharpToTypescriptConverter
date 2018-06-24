@@ -60,4 +60,9 @@ namespace CSharpToTypescriptConverter.TestMock
 	{
 		public int Property2 { get; set; }
 	}
+
+	public class DynamicClass : System.Dynamic.DynamicObject
+	{
+		public int Foo { get; set; }
+	}
 }

@@ -65,28 +65,39 @@ namespace CSharpToTypescriptConverter
 				this.WriteDocumentation(documentation);
 			}
 
-			this.writer.BeginLine();
-			this.writer.Write("export ");
-			WriteTypeInfoType(typeInfo);
-			this.writer.Write(" ");
-			WriteType(typeInfo);
-			if (typeInfo.BaseType != null)
+			if (typeInfo is TypeInfo.DynamicType)
 			{
-				this.writer.Write(" extends ");
-				this.WriteType(typeInfo.BaseType);
+				this.writer.BeginLine();
+				this.writer.Write("export type ");
+				WriteType(typeInfo);
+				this.writer.Write(" = any;");
+				this.writer.EndLine();
 			}
-			this.writer.Write(" {");
-			this.writer.EndLine();
-
-			this.writer.Indent();
-			foreach (var member in typeInfo.Members)
+			else
 			{
-				WriteMemberDeclaration(typeInfo, member);
-			}
-			this.writer.Unindent();
+				this.writer.BeginLine();
+				this.writer.Write("export ");
+				WriteTypeInfoType(typeInfo);
+				this.writer.Write(" ");
+				WriteType(typeInfo);
+				if (typeInfo.BaseType != null)
+				{
+					this.writer.Write(" extends ");
+					this.WriteType(typeInfo.BaseType);
+				}
+				this.writer.Write(" {");
+				this.writer.EndLine();
 
-			this.writer.WriteLine("}");
-			this.writer.WriteLine();
+				this.writer.Indent();
+				foreach (var member in typeInfo.Members)
+				{
+					WriteMemberDeclaration(typeInfo, member);
+				}
+				this.writer.Unindent();
+
+				this.writer.WriteLine("}");
+				this.writer.WriteLine();
+			}
 		}
 
 		private void WriteDocumentation(DocumentationInfo documentation)

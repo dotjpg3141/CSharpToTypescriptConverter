@@ -1,5 +1,6 @@
 ﻿#pragma warning disable 1591
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,12 @@ namespace CSharpToTypescriptConverter.TestMock
 		/// Property Documentation
 		/// </summary>
 		public int IntProperty { get; set; }
+
+		public int[] IntArray { get; set; }
+		public List<int> IntList { get; set; }
+		public int[][] IntArrayArray { get; set; }
+		public List<List<int>> IntListList { get; set; }
+		public ArrayList ArrayListType { get; set; }
 	}
 
 	public class PublicClass2

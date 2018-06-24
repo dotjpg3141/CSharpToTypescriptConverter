@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -139,10 +140,8 @@ namespace CSharpToTypescriptConverter.Reflection
 				foreach (var type in types)
 				{
 					var memberInfos = memberProvider.GetMembers(type);
-					var typeInfo = new TypeInfo(type)
-					{
-						Members = memberInfos.ToArray(),
-					};
+					var typeInfo = TypeInfo.FromType(type);
+					typeInfo.Members = memberInfos.ToArray();
 					typeInfos.Add(typeInfo);
 				}
 				return typeInfos;

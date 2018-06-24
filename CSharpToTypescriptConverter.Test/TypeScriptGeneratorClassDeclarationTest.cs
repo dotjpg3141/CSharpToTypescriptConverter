@@ -18,36 +18,46 @@ namespace CSharpToTypescriptConverter.Test
 		[TestMethod]
 		public void ClassDeclarationTest()
 		{
-			var types = new[] { new TypeInfo(typeof(Class1)) { Members = new MemberInfo[0] } };
-			AssertGenerator(types, "export class Class1 {}");
+			var type = TypeInfo.FromType(typeof(Class1));
+			type.Members = new MemberInfo[0];
+
+			AssertGenerator(new[] { type }, "export class Class1 {}");
 		}
 
 		[TestMethod]
 		public void MakeClassToInterfaceDeclarationTest()
 		{
-			var types = new[] { new TypeInfo(typeof(Class1)) { Members = new MemberInfo[0] } };
-			AssertGenerator(types, "export interface Class1 {}", options => options.MakeClassesToInterfaces = true);
+			var type = TypeInfo.FromType(typeof(Class1));
+			type.Members = new MemberInfo[0];
+
+			AssertGenerator(new[] { type }, "export interface Class1 {}", options => options.MakeClassesToInterfaces = true);
 		}
 
 		[TestMethod]
 		public void InterfaceDeclarationTest()
 		{
-			var types = new[] { new TypeInfo(typeof(Class1)) { Members = new MemberInfo[0] } };
-			AssertGenerator(types, "export class IClass1 {}", options => options.ClassPrefix = "I");
+			var type = TypeInfo.FromType(typeof(Class1));
+			type.Members = new MemberInfo[0];
+
+			AssertGenerator(new[] { type }, "export class IClass1 {}", options => options.ClassPrefix = "I");
 		}
 
 		[TestMethod]
 		public void EnumDeclarationTest()
 		{
-			var types = new[] { new TypeInfo(typeof(Enum1)) { Members = new MemberInfo[0] } };
-			AssertGenerator(types, "export enum Enum1 {}");
+			var type = TypeInfo.FromType(typeof(Enum1));
+			type.Members = new MemberInfo[0];
+
+			AssertGenerator(new[] { type }, "export enum Enum1 {}");
 		}
 
 		[TestMethod]
 		public void ConstEnumDeclarationTest()
 		{
-			var types = new[] { new TypeInfo(typeof(Enum1)) { Members = new MemberInfo[0] } };
-			AssertGenerator(types, "export const enum Enum1 {}", options => options.MakeEnumsConst = true);
+			var type = TypeInfo.FromType(typeof(Enum1));
+			type.Members = new MemberInfo[0];
+
+			AssertGenerator(new[] { type }, "export const enum Enum1 {}", options => options.MakeEnumsConst = true);
 		}
 
 		private class Class1

@@ -131,7 +131,12 @@ namespace CSharpToTypescriptConverter
 
 		private void WriteType(TypeInfo typeInfo)
 		{
-			if (this.CSharpToTypescriptTypes.TryGetValue(typeInfo.FullName, out var typescriptType))
+			if (typeInfo is TypeInfo.ArrayType arrayType)
+			{
+				this.WriteType(arrayType.ElementType);
+				this.writer.Write("[]");
+			}
+			else if (this.CSharpToTypescriptTypes.TryGetValue(typeInfo.FullName, out var typescriptType))
 			{
 				this.writer.Write(typescriptType);
 			}

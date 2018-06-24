@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,9 +14,11 @@ namespace CSharpToTypescriptConverter
 	public class TypeScriptGenerator
 	{
 		private static readonly Regex Whitespace = new Regex(@"\s+", RegexOptions.Compiled);
-		public const string Number = "Number";
-		public const string String = "String";
+		public const string Number = "number";
+		public const string String = "string";
 		public const string Any = "any";
+		public const string Boolean = "boolean";
+		public const string Date = "Date";
 
 		private readonly IndentWriter writer;
 
@@ -23,11 +26,13 @@ namespace CSharpToTypescriptConverter
 		public string ClassPrefix { get; set; }
 		public string EnumPrefix { get; set; }
 		public bool MakeEnumsConst { get; set; }
+		public bool Verbose { get; set; }
 
 		public DocumentationProvider DocumentationProvider { get; set; }
 
 		public Dictionary<string, string> CSharpToTypescriptTypes = new Dictionary<string, string>()
 		{
+			[typeof(bool).FullName] = Boolean,
 			[typeof(byte).FullName] = Number,
 			[typeof(short).FullName] = Number,
 			[typeof(int).FullName] = Number,
@@ -42,7 +47,10 @@ namespace CSharpToTypescriptConverter
 			[typeof(char).FullName] = String,
 			[typeof(string).FullName] = String,
 			[typeof(object).FullName] = Any,
+			[typeof(DateTime).FullName] = Date,
 		};
+
+		private ImmutableHashSet<TypeInfo> generatingTypes = ImmutableHashSet<TypeInfo>.Empty;
 
 		public TypeScriptGenerator(TextWriter writer)
 		{
@@ -52,14 +60,23 @@ namespace CSharpToTypescriptConverter
 
 		public void Generate(IEnumerable<TypeInfo> types)
 		{
-			foreach (var type in types.OrderBy(type => type.InheritanceLevel).ThenBy(type => type.Name))
+			this.generatingTypes = types.ToImmutableHashSet();
+
+			foreach (var type in this.generatingTypes.OrderBy(type => type.InheritanceLevel).ThenBy(type => type.Name))
 			{
 				WriteTypeDeclaration(type);
 			}
+
+			this.generatingTypes = ImmutableHashSet<TypeInfo>.Empty;
 		}
 
-		public void WriteTypeDeclaration(TypeInfo typeInfo)
+		private void WriteTypeDeclaration(TypeInfo typeInfo)
 		{
+			if (this.Verbose)
+			{
+				this.writer.WriteLine("// " + typeInfo.FullName);
+			}
+
 			if (this.DocumentationProvider.TryGetDocumentation(typeInfo, out var documentation))
 			{
 				this.WriteDocumentation(documentation);
@@ -69,8 +86,18 @@ namespace CSharpToTypescriptConverter
 			{
 				this.writer.BeginLine();
 				this.writer.Write("export type ");
-				WriteType(typeInfo);
-				this.writer.Write(" = any;");
+				this.WriteTypeName(typeInfo);
+				this.writer.Write($" = {Any};");
+				this.writer.EndLine();
+			}
+			else if (typeInfo is TypeInfo.ArrayType arrayType)
+			{
+				this.writer.BeginLine();
+				this.writer.Write("export type ");
+				this.WriteTypeName(typeInfo);
+				this.writer.Write(" = ");
+				this.WriteType(arrayType.ElementType);
+				this.writer.Write("[];");
 				this.writer.EndLine();
 			}
 			else
@@ -142,7 +169,11 @@ namespace CSharpToTypescriptConverter
 
 		private void WriteType(TypeInfo typeInfo)
 		{
-			if (typeInfo is TypeInfo.ArrayType arrayType)
+			if (this.generatingTypes.Contains(typeInfo))
+			{
+				this.WriteTypeName(typeInfo);
+			}
+			else if (typeInfo is TypeInfo.ArrayType arrayType)
 			{
 				this.WriteType(arrayType.ElementType);
 				this.writer.Write("[]");
@@ -153,8 +184,25 @@ namespace CSharpToTypescriptConverter
 			}
 			else
 			{
+				//WriteTypeName(typeInfo);
+				WriteTypeName(typeInfo);
+			}
+		}
+
+		private void WriteTypeName(TypeInfo typeInfo)
+		{
+			if (this.CSharpToTypescriptTypes.TryGetValue(typeInfo.FullName, out var typescriptType))
+			{
+				this.writer.Write(typescriptType);
+			}
+			else if (this.generatingTypes.Contains(typeInfo))
+			{
 				var prefix = typeInfo.Type == TypeInfoType.Enum ? this.EnumPrefix : this.ClassPrefix;
 				this.writer.Write(prefix + typeInfo.Name);
+			}
+			else
+			{
+				this.writer.Write($"{Any}/*({typeInfo.Name})*/");
 			}
 		}
 

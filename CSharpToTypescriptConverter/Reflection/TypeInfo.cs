@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,8 @@ namespace CSharpToTypescriptConverter.Reflection
 		private static readonly string IEnumerableType = typeof(System.Collections.IEnumerable).FullName;
 		private static readonly string GenericIEnumerableType = typeof(IEnumerable<>).FullName;
 		private static readonly string DynamicObjectType = typeof(System.Dynamic.DynamicObject).FullName;
+
+		private static readonly Dictionary<Type, TypeInfo> TypeInfoCache = new Dictionary<Type, TypeInfo>();
 
 		public static readonly ImmutableHashSet<string> ExludedInheritanceTypes = new[]
 		{
@@ -50,7 +53,7 @@ namespace CSharpToTypescriptConverter.Reflection
 		{
 			this.Namespace = type.Namespace;
 			this.Name = type.Name;
-			this.FullName = type.FullName;
+			this.FullName = type.FullName ?? "";
 			this.Type = type.IsEnum ? TypeInfoType.Enum : TypeInfoType.Class;
 
 			var baseTypeName = type.BaseType?.FullName ?? "";
@@ -59,23 +62,46 @@ namespace CSharpToTypescriptConverter.Reflection
 
 		public static TypeInfo FromType(Type type)
 		{
-			var interfaces = type.GetInterfaces();
+			if (TypeInfoCache.TryGetValue(type, out var typeInfo))
+			{
+				return typeInfo;
+			}
+
+			var interfacesNames = new Dictionary<string, Type>();
+			foreach (var itf in type.GetInterfaces())
+			{
+				var fullName = itf.IsGenericType ? itf.GetGenericTypeDefinition().FullName : itf.FullName;
+				interfacesNames[fullName ?? ""] = itf;
+			}
 
 			if (type.GetTypeAndBaseTypes().Any(t => t.FullName == DynamicObjectType))
 			{
-				return new DynamicType(type);
+				var dynamicTypeInfo = new DynamicType(type);
+				TypeInfoCache[type] = dynamicTypeInfo;
+				return dynamicTypeInfo;
 			}
-			else if (interfaces.FirstOrDefault(itf => itf.IsGenericType
-			  && itf.GetGenericTypeDefinition().FullName == GenericIEnumerableType) is Type arrayType)
+			else if (interfacesNames.TryGetValue(GenericIEnumerableType, out var arrayType))
 			{
 				var parameter = arrayType.GetGenericArguments().Single();
-				return new ArrayType(type, FromType(parameter));
+
+				var arrayTypeInfo = new ArrayType(type);
+				TypeInfoCache[type] = arrayTypeInfo;
+				arrayTypeInfo.ElementType = FromType(parameter);
+				return arrayTypeInfo;
 			}
-			else if (type.GetInterfaces().Any(@interface => @interface.FullName == IEnumerableType))
+			else if (interfacesNames.ContainsKey(IEnumerableType))
 			{
-				return new ArrayType(type, FromType(typeof(object)));
+				var arrayTypeInfo = new ArrayType(type);
+				TypeInfoCache[type] = arrayTypeInfo;
+				arrayTypeInfo.ElementType = FromType(typeof(object));
+				return arrayTypeInfo;
 			}
-			return new SimpleType(type);
+			else
+			{
+				var simpleTypeInfo = new SimpleType(type);
+				TypeInfoCache[type] = simpleTypeInfo;
+				return simpleTypeInfo;
+			}
 		}
 
 		[Serializable]
@@ -90,9 +116,22 @@ namespace CSharpToTypescriptConverter.Reflection
 		[Serializable]
 		public sealed class ArrayType : TypeInfo
 		{
-			public TypeInfo ElementType { get; }
+			private TypeInfo elementType;
 
-			internal ArrayType(Type type, TypeInfo elementType)
+			public TypeInfo ElementType
+			{
+				get => this.elementType;
+				set
+				{
+					if (this.elementType != null)
+					{
+						throw new InvalidOperationException();
+					}
+					this.elementType = value;
+				}
+			}
+
+			internal ArrayType(Type type)
 				: base(type)
 			{
 				this.ElementType = elementType;

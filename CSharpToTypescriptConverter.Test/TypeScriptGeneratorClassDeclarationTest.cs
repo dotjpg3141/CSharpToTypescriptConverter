@@ -19,7 +19,8 @@ namespace CSharpToTypescriptConverter.Test
 		public void ClassDeclarationTest()
 		{
 			var type = TypeInfo.FromType(typeof(Class1));
-			type.Members = new MemberInfo[0];
+			if (type.Members == null)
+				type.Members = new MemberInfo[0];
 
 			AssertGenerator(new[] { type }, "export class Class1 {}");
 		}
@@ -28,7 +29,8 @@ namespace CSharpToTypescriptConverter.Test
 		public void MakeClassToInterfaceDeclarationTest()
 		{
 			var type = TypeInfo.FromType(typeof(Class1));
-			type.Members = new MemberInfo[0];
+			if (type.Members == null)
+				type.Members = new MemberInfo[0];
 
 			AssertGenerator(new[] { type }, "export interface Class1 {}", options => options.MakeClassesToInterfaces = true);
 		}
@@ -37,7 +39,8 @@ namespace CSharpToTypescriptConverter.Test
 		public void InterfaceDeclarationTest()
 		{
 			var type = TypeInfo.FromType(typeof(Class1));
-			type.Members = new MemberInfo[0];
+			if (type.Members == null)
+				type.Members = new MemberInfo[0];
 
 			AssertGenerator(new[] { type }, "export class IClass1 {}", options => options.ClassPrefix = "I");
 		}
@@ -46,7 +49,8 @@ namespace CSharpToTypescriptConverter.Test
 		public void EnumDeclarationTest()
 		{
 			var type = TypeInfo.FromType(typeof(Enum1));
-			type.Members = new MemberInfo[0];
+			if (type.Members == null)
+				type.Members = new MemberInfo[0];
 
 			AssertGenerator(new[] { type }, "export enum Enum1 {}");
 		}
@@ -55,7 +59,8 @@ namespace CSharpToTypescriptConverter.Test
 		public void ConstEnumDeclarationTest()
 		{
 			var type = TypeInfo.FromType(typeof(Enum1));
-			type.Members = new MemberInfo[0];
+			if (type.Members == null)
+				type.Members = new MemberInfo[0];
 
 			AssertGenerator(new[] { type }, "export const enum Enum1 {}", options => options.MakeEnumsConst = true);
 		}

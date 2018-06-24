@@ -100,7 +100,7 @@ namespace CSharpToTypescriptConverter.Reflection
 		internal IEnumerable<Type> GetTypeAndBaseTypes(Type type)
 		{
 			return type.GetTypeAndBaseTypes()
-				.TakeWhile(tp => !TypeInfo.ExludedInheritanceTypes.Contains(tp.FullName));
+				.TakeWhile(tp => !TypeInfo.ExludedInheritanceTypes.Contains(tp.FullName ?? ""));
 		}
 
 		private static AppDomain GetTempAppDomain()
@@ -146,10 +146,28 @@ namespace CSharpToTypescriptConverter.Reflection
 
 			private IEnumerable<Type> LoadTypes(string[] dllPath)
 			{
+
+				var namesToPaths = dllPath
+					.ToDictionary(
+						path => Path.GetFileNameWithoutExtension(path)?.ToLowerInvariant(),
+						path => path);
+
 				AppDomain.CurrentDomain.AssemblyResolve += (sender, e) =>
 				{
-					var assembly = Assembly.Load(e.Name);
-					return assembly ?? throw new TypeLoadException($"Could not load assembly '{e.Name}'");
+					var name = e.Name.ToLowerInvariant();
+					var index = name.IndexOf(",", StringComparison.Ordinal);
+					if (index != -1)
+					{
+						name = name.Substring(0, index);
+					}
+					if (namesToPaths.TryGetValue(name, out var path))
+					{
+						return Assembly.LoadFile(path);
+					}
+					else
+					{
+						return Assembly.Load(e.Name) ?? throw new TypeLoadException($"Could not load assembly '{e.Name}'");
+					}
 				};
 
 				var assemblies = dllPath.Select(Assembly.LoadFrom).ToList();

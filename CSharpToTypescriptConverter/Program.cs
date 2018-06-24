@@ -30,6 +30,7 @@ namespace CSharpToTypescriptConverter
 			var generator = new TypeScriptGenerator(Console.Out)
 			{
 				DocumentationProvider = documentationProvider,
+				Verbose = true,
 			};
 			generator.Generate(types);
 		}
